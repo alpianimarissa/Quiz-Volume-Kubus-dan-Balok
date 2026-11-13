@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif 30 Soal: Konversi & Volume Kubus Balok - Kelas 4 SD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- KaTeX CSS & JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderAllMath();"></script>
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        .isometric-svg { filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.12)); }
+        .fade-in { animation: fadeIn 0.25s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Custom scrollbar for question grid */
+        .nav-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .nav-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    </style>
+</head>
+<body class="bg-sky-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-600 via-indigo-600 to-teal-500 text-white shadow-lg sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-3 md:py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/20 p-2.5 rounded-2xl backdrop-blur-md shadow-inner text-2xl">🏆</div>
+                <div>
+                    <h1 class="text-base md:text-xl font-bold tracking-wide">Kuis 30 Soal: Konversi & Volume Kubus Balok</h1>
+                    <p class="text-xs text-sky-100">Matematika Kelas 4 SD • Otomatis Tersimpan di Perangkat</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2.5 text-xs">
+                <div class="bg-white/15 backdrop-blur-sm px-3.5 py-2 rounded-xl border border-white/20 flex items-center gap-2">
+                    <span>✅ Benar: <strong id="header-correct" class="text-emerald-200">0</strong></span>
+                    <span class="opacity-50">|</span>
+                    <span>📝 Terjawab: <strong id="header-answered">0</strong>/30</span>
+                </div>
+                <button onclick="confirmReset()" class="bg-rose-500 hover:bg-rose-600 text-white font-semibold px-3 py-2 rounded-xl shadow transition-all flex items-center gap-1" title="Ulangi Kuis dari Awal">
+                    <span>↺</span> <span class="hidden md:inline">Reset</span>
+                </button>
+            </div>
+        </div>
+        <!-- Progress Bar -->
+        <div class="w-full bg-blue-950/30 h-1.5">
+            <div id="progress-bar" class="bg-amber-400 h-1.5 transition-all duration-300" style="width: 0%"></div>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- Left Column: Question Area (8 cols) -->
+        <div class="lg:col-span-8 space-y-5">
+            <!-- Question Card -->
+            <div id="question-card" class="bg-white rounded-3xl p-5 md:p-8 shadow-sm border border-slate-200 fade-in">
+                <!-- Top Meta -->
+                <div class="flex flex-wrap justify-between items-center gap-2 pb-4 mb-5 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <span id="q-number-badge" class="bg-indigo-600 text-white text-xs md:text-sm font-extrabold px-3.5 py-1.5 rounded-xl">
+                            Soal 1 dari 30
+                        </span>
+                        <span id="q-category-badge" class="bg-sky-100 text-sky-800 text-xs font-bold px-3 py-1.5 rounded-xl">
+                            Konversi Satuan
+                        </span>
+                    </div>
+                    <span id="q-status-badge" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-500">
+                        Belum Dijawab
+                    </span>
+                </div>
+
+                <!-- Illustration Container (if any) -->
+                <div id="q-illustration" class="hidden mb-6 bg-slate-50/90 border border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center">
+                </div>
+
+                <!-- Question Text -->
+                <div id="q-text" class="text-slate-800 text-base md:text-lg font-semibold leading-relaxed mb-6">
+                </div>
+
+                <!-- Options Container -->
+                <div id="q-options" class="space-y-3">
+                </div>
+
+                <!-- Instant Feedback & Rationale Box -->
+                <div id="q-feedback" class="hidden mt-6 p-4 md:p-5 rounded-2xl border-2 fade-in">
+                    <div class="flex items-center gap-2 mb-1.5">
+                        <span id="fb-icon" class="text-xl"></span>
+                        <h4 id="fb-title" class="font-extrabold text-sm md:text-base"></h4>
+                    </div>
+                    <p id="fb-rationale" class="text-xs md:text-sm leading-relaxed"></p>
+                </div>
+
+                <!-- Bottom Navigation Controls -->
+                <div class="mt-8 pt-5 border-t border-slate-100 flex justify-between items-center gap-3">
+                    <button id="btn-prev" onclick="prevQuestion()" class="px-4 md:px-5 py-2.5 rounded-xl font-bold text-xs md:text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 disabled:opacity-40 disabled:pointer-events-none transition-all">
+                        ← Sebelumnya
+                    </button>
+
+                    <button id="btn-finish" onclick="showSummaryModal()" class="hidden px-5 py-2.5 rounded-xl font-bold text-xs md:text-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-all">
+                        🏁 Lihat Hasil Akhir
+                    </button>
+
+                    <button id="btn-next" onclick="nextQuestion()" class="px-5 md:px-6 py-2.5 rounded-xl font-bold text-xs md:text-sm bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm disabled:opacity-40 disabled:pointer-events-none transition-all">
+                        Selanjutnya →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Auto-save notice -->
+            <div class="bg-white/80 border border-sky-200 rounded-2xl px-4 py-3 flex items-center justify-between text-xs text-slate-600">
+                <div class="flex items-center gap-2">
+                    <span class="text-emerald-600 text-base">💾</span>
+                    <span>Jawabanmu <strong>tersimpan otomatis</strong> di browser. Aman jika halaman ter-reload atau internet putus.</span>
+                </div>
+                <span id="save-indicator" class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">Tersimpan</span>
+            </div>
+        </div>
+
+        <!-- Right Column: Navigation Grid & Score Card (4 cols) -->
+        <aside class="lg:col-span-4 space-y-5">
+            <div class="bg-white rounded-3xl p-5 md:p-6 shadow-sm border border-slate-200">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="font-bold text-slate-900 text-sm md:text-base flex items-center gap-2">
+                        <span>🧭</span> Navigasi Nomor Soal
+                    </h2>
+                    <button onclick="showSummaryModal()" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 underline">
+                        Rekap Nilai
+                    </button>
+                </div>
+
+                <!-- Legend -->
+                <div class="grid grid-cols-3 gap-2 text-[11px] font-semibold text-slate-600 mb-4 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded bg-emerald-500 inline-block"></span> Benar
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded bg-rose-500 inline-block"></span> Salah
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded bg-slate-200 inline-block"></span> Kosong
+                    </div>
+                </div>
+
+                <!-- 30 Number Buttons Grid -->
+                <div id="nav-grid" class="grid grid-cols-5 sm:grid-cols-6 lg:grid-cols-5 gap-2 max-h-[360px] overflow-y-auto nav-scroll p-1">
+                </div>
+
+                <!-- Quick Summary Box -->
+                <div class="mt-5 pt-4 border-t border-slate-100 grid grid-cols-3 gap-2 text-center">
+                    <div class="bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl">
+                        <p class="text-[11px] text-emerald-700 font-semibold">Benar</p>
+                        <p id="stat-correct" class="text-lg font-extrabold text-emerald-800">0</p>
+                    </div>
+                    <div class="bg-rose-50 border border-rose-200 p-2.5 rounded-xl">
+                        <p class="text-[11px] text-rose-700 font-semibold">Salah</p>
+                        <p id="stat-wrong" class="text-lg font-extrabold text-rose-800">0</p>
+                    </div>
+                    <div class="bg-indigo-50 border border-indigo-200 p-2.5 rounded-xl">
+                        <p class="text-[11px] text-indigo-700 font-semibold">Skor</p>
+                        <p id="stat-score" class="text-lg font-extrabold text-indigo-800">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mini Reference Card -->
+            <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-5 border border-amber-200 text-xs space-y-2">
+                <h3 class="font-bold text-amber-950 flex items-center gap-1.5"><span>💡</span> Pengingat Rumus & Tangga</h3>
+                <ul class="space-y-1 text-amber-900">
+                    <li>• $1\text{ Liter} = 1\text{ dm}^3 = 1.000\text{ ml} = 1.000\text{ cm}^3$</li>
+                    <li>• $1\text{ ml} = 1\text{ cm}^3 = 1\text{ cc}$</li>
+                    <li>• Tangga Liter: $\text{kl} - \text{hl} - \text{dal} - \text{l} - \text{dl} - \text{cl} - \text{ml}$ (turun $\times 10$, naik $\div 10$)</li>
+                    <li>• Volume Kubus: $V = s \times s \times s$</li>
+                    <li>• Volume Balok: $V = p \times l \times t$</li>
+                </ul>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Summary Modal -->
+    <div id="summary-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 md:p-8 shadow-2xl border border-slate-200 text-center space-y-5 fade-in">
+            <div id="modal-trophy" class="text-5xl">🏆</div>
+            <div>
+                <h2 class="text-2xl font-extrabold text-slate-900">Rekap Hasil Kuis</h2>
+                <p id="modal-subtitle" class="text-xs md:text-sm text-slate-600 mt-1">Berikut pencapaianmu pada 30 soal kuis volume!</p>
+            </div>
+
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl p-5 shadow-inner">
+                <p class="text-xs uppercase tracking-wider text-sky-100 font-semibold">Nilai Akhir Kamu</p>
+                <p id="modal-final-score" class="text-4xl md:text-5xl font-extrabold mt-1">0</p>
+                <p class="text-xs text-sky-100 mt-1">dari 100 poin</p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3 text-xs">
+                <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl">
+                    <p class="text-emerald-700 font-semibold">Benar</p>
+                    <p id="modal-correct" class="text-xl font-extrabold text-emerald-800">0</p>
+                </div>
+                <div class="bg-rose-50 border border-rose-200 p-3 rounded-xl">
+                    <p class="text-rose-700 font-semibold">Salah</p>
+                    <p id="modal-wrong" class="text-xl font-extrabold text-rose-800">0</p>
+                </div>
+                <div class="bg-slate-100 border border-slate-200 p-3 rounded-xl">
+                    <p class="text-slate-600 font-semibold">Belum Isi</p>
+                    <p id="modal-unanswered" class="text-xl font-extrabold text-slate-800">0</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-2.5 pt-2">
+                <button onclick="closeSummaryModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3 rounded-xl text-xs md:text-sm transition-all">
+                    Tutup & Periksa Soal
+                </button>
+                <button onclick="confirmReset()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl text-xs md:text-sm transition-all">
+                    ↺ Ulangi Kuis Baru
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-5 mt-10 text-center text-xs text-slate-500">
+        <p>Kuis Interaktif Matematika Kelas 4 SD/MI • Konversi Satuan Volume, Kubus & Balok</p>
+    </footer>
+
+    <script>
+        // Helper SVG Generators for Clear Isometric 3D Illustrations
+        function svgUnitCubeStack(layers) {
+            // layers: array of [x, y, z] grid coordinates (0-indexed)
+            // Sort painter's algorithm: back-to-front, bottom-to-top
+            const sorted = [...layers].sort((a, b) => (a[2] - b[2]) || (a[0] - b[0]) || (a[1] - b[1]));
+            let cubesSvg = '';
+            let minX = 999, maxX = -999, minY = 999, maxY = -999;
+
+            sorted.forEach(([gx, gy, gz]) => {
+                // Isometric projection
+                const isoX = (gx - gy) * 20;
+                const isoY = (gx + gy) * 10 - gz * 20;
+                minX = Math.min(minX, isoX - 20);
+                maxX = Math.max(maxX, isoX + 20);
+                minY = Math.min(minY, isoY);
+                maxY = Math.max(maxY, isoY + 40);
+
+                cubesSvg += `
+                    <g transform="translate(${isoX - 20}, ${isoY})">
+                        <polygon points="20,0 40,10 20,20 0,10" fill="#ff758f" stroke="#0f172a" stroke-width="1.7" stroke-linejoin="round"/>
+                        <polygon points="0,10 20,20 20,40 0,30" fill="#ffb703" stroke="#0f172a" stroke-width="1.7" stroke-linejoin="round"/>
+                        <polygon points="20,20 40,10 40,30 20,40" fill="#4ea8de" stroke="#0f172a" stroke-width="1.7" stroke-linejoin="round"/>
+                    </g>`;
+            });
+
+            const pad = 12;
+            const vbX = minX - pad;
+            const vbY = minY - pad;
+            const vbW = (maxX - minX) + pad * 2;
+            const vbH = (maxY - minY) + pad * 2;
+
+            return `<svg width="210" height="155" viewBox="${vbX} ${vbY} ${vbW} ${vbH}" class="isometric-svg">${cubesSvg}</svg>`;
+        }
+
+        function svgLabeledCube(labelS, colorTheme = 'amber') {
+            const colors = colorTheme === 'blue'
+                ? { top: '#93c5fd', left: '#3b82f6', right: '#1d4ed8', text: '#1e3a8a' }
+                : { top: '#fde047', left: '#f59e0b', right: '#d97706', text: '#92400e' };
+
+            return `
+            <svg width="200" height="145" viewBox="0 0 200 145" class="isometric-svg">
+                <polygon points="100,15 150,40 100,65 50,40" fill="${colors.top}" stroke="#0f172a" stroke-width="2" stroke-linejoin="round"/>
+                <polygon points="50,40 100,65 100,120 50,95" fill="${colors.left}" stroke="#0f172a" stroke-width="2" stroke-linejoin="round"/>
+                <polygon points="100,65 150,40 150,95 100,120" fill="${colors.right}" stroke="#0f172a" stroke-width="2" stroke-linejoin="round"/>
+                <!-- Dimension lines & labels -->
+                <text x="32" y="116" fill="${colors.text}" font-size="12" font-weight="bold">s = ${labelS}</text>
+                <text x="122" y="116" fill="${colors.text}" font-size="12" font-weight="bold">s = ${labelS}</text>
+                <text x="155" y="72" fill="${colors.text}" font-size="12" font-weight="bold">s = ${labelS}</text>
+            </svg>`;
+        }
+
+        function svgLabeledCuboid(labelP, labelL, labelT, colorTheme = 'teal') {
+            const colors = colorTheme === 'purple'
+                ? { top: '#d8b4fe', left: '#a855f7', right: '#7e22ce', text: '#581c87' }
+                : { top: '#5eead4', left: '#14b8a6', right: '#0f766e', text: '#115e59' };
+
+            return `
+            <svg width="235" height="150" viewBox="0 0 235 150" class="isometric-svg">
+                <polygon points="115,18 178,45 98,82 35,55" fill="${colors.top}" stroke="#0f172a" stroke-width="2" stroke-linejoin="round"/>
+                <polygon points="35,55 98,82 98,124 35,97" fill="${colors.left}" stroke="#0f172a" stroke-width="2" stroke-linejoin="round"/>
+                <polygon points="98,82 178,45 178,87 98,124" fill="${colors.right}" stroke="#0f172a" stroke-width="2" stroke-linejoin="round"/>
+                <!-- Labels -->
+                <text x="20" y="118" fill="${colors.text}" font-size="12" font-weight="bold">p = ${labelP}</text>
+                <text x="132" y="118" fill="${colors.text}" font-size="12" font-weight="bold">l = ${labelL}</text>
+                <text x="183" y="70" fill="${colors.text}" font-size="12" font-weight="bold">t = ${labelT}</text>
+            </svg>`;
+        }
+
+        function svgLadderReminder() {
+            return `
+            <div class="flex flex-wrap items-center justify-center gap-2 text-xs font-bold">
+                <span class="bg-blue-700 text-white px-2.5 py-1 rounded-lg">kl</span>
+                <span>→</span>
+                <span class="bg-blue-600 text-white px-2.5 py-1 rounded-lg">hl</span>
+                <span>→</span>
+                <span class="bg-blue-500 text-white px-2.5 py-1 rounded-lg">dal</span>
+                <span>→</span>
+                <span class="bg-amber-500 text-white px-2.5 py-1 rounded-lg shadow">l (dm³)</span>
+                <span>→</span>
+                <span class="bg-teal-500 text-white px-2.5 py-1 rounded-lg">dl</span>
+                <span>→</span>
+                <span class="bg-teal-600 text-white px-2.5 py-1 rounded-lg">cl</span>
+                <span>→</span>
+                <span class="bg-teal-700 text-white px-2.5 py-1 rounded-lg shadow">ml (cm³)</span>
+            </div>`;
+        }
+
+        // Build 3x3x3 cube coordinates
+        const coords3x3x3 = [];
+        for (let z = 0; z < 3; z++) {
+            for (let x = 0; x < 3; x++) {
+                for (let y = 0; y < 3; y++) {
+                    coords3x3x3.push([x, y, z]);
+                }
+            }
+        }
+
+        // Build 4x2x2 cuboid coordinates
+        const coords4x2x2 = [];
+        for (let z = 0; z < 2; z++) {
+            for (let x = 0; x < 4; x++) {
+                for (let y = 0; y < 2; y++) {
+                    coords4x2x2.push([x, y, z]);
+                }
+            }
+        }
+
+        // Build 3x2x3 cuboid coordinates
+        const coords3x2x3 = [];
+        for (let z = 0; z < 3; z++) {
+            for (let x = 0; x < 3; x++) {
+                for (let y = 0; y < 2; y++) {
+                    coords3x2x3.push([x, y, z]);
+                }
+            }
+        }
+
+        // 30 Unique Questions (Fresh scenarios & numbers, distinct from the lesson examples)
+        const baseQuestions = [
+            // --- BAGIAN 1: KONVERSI SATUAN VOLUME (10 Soal) ---
+            {
+                id: 1,
+                category: "Konversi Satuan",
+                question: "Ayah membeli $5\\text{ Liter}$ bensin di SPBU. Jika dinyatakan dalam satuan mililiter ($\\text{ml}$), volume bensin tersebut adalah...",
+                illustration: svgLadderReminder(),
+                options: ["$50\\text{ ml}$", "$500\\text{ ml}$", "$5.000\\text{ ml}$", "$50.000\\text{ ml}$"],
+                correctText: "$5.000\\text{ ml}$",
+                rationale: "Dari Liter ($\\text{l}$) ke mililiter ($\\text{ml}$) turun 3 anak tangga, sehingga dikali $1.000$. Jadi, $5 \\times 1.000 = 5.000\\text{ ml}$."
+            },
+            {
+                id: 2,
+                category: "Konversi Satuan",
+                question: "Sebuah galon air berisi $12.000\\text{ ml}$ air mineral. Berapa Liter isi air di dalam galon tersebut?",
+                illustration: svgLadderReminder(),
+                options: ["$12\\text{ Liter}$", "$120\\text{ Liter}$", "$1.200\\text{ Liter}$", "$1,2\\text{ Liter}$"],
+                correctText: "$12\\text{ Liter}$",
+                rationale: "Dari mililiter ($\\text{ml}$) ke Liter ($\\text{l}$) naik 3 anak tangga, sehingga dibagi $1.000$. Jadi, $12.000 \\div 1.000 = 12\\text{ Liter}$."
+            },
+            {
+                id: 3,
+                category: "Konversi Satuan",
+                question: "Ingat jembatan kesetaraan satuan volume! Nilai dari $7\\text{ dm}^3$ sama dengan...",
+                options: ["$7\\text{ ml}$", "$70\\text{ Liter}$", "$7\\text{ Liter}$", "$700\\text{ cm}^3$"],
+                correctText: "$7\\text{ Liter}$",
+                rationale: "Berdasarkan jembatan kesetaraan satuan, $1\\text{ dm}^3 = 1\\text{ Liter}$. Maka $7\\text{ dm}^3 = 7\\text{ Liter}$."
+            },
+            {
+                id: 4,
+                category: "Konversi Satuan",
+                question: "Dokter memberikan resep obat sirup sebanyak $15\\text{ ml}$ setiap hari. Volume obat tersebut jika ditulis dalam satuan $\\text{cm}^3$ adalah...",
+                options: ["$150\\text{ cm}^3$", "$15\\text{ cm}^3$", "$1.500\\text{ cm}^3$", "$15.000\\text{ cm}^3$"],
+                correctText: "$15\\text{ cm}^3$",
+                rationale: "Satuan mililiter setara langsung dengan sentimeter kubik ($1\\text{ ml} = 1\\text{ cm}^3$). Jadi, $15\\text{ ml} = 15\\text{ cm}^3$."
+            },
+            {
+                id: 5,
+                category: "Konversi Satuan",
+                question: "Sebuah teko berisi $3\\text{ Liter}$ teh manis. Jika teh dituang ke gelas-gelas kecil berukuran $250\\text{ ml}$ per gelas, berapa banyak gelas yang terisi penuh?",
+                options: ["$8\\text{ gelas}$", "$10\\text{ gelas}$", "$12\\text{ gelas}$", "$15\\text{ gelas}$"],
+                correctText: "$12\\text{ gelas}$",
+                rationale: "Ubah $3\\text{ Liter} = 3.000\\text{ ml}$. Kemudian bagi dengan ukuran gelas: $3.000 \\div 250 = 12\\text{ gelas}$."
+            },
+            {
+                id: 6,
+                category: "Konversi Satuan",
+                question: "Hasil dari $4\\text{ hl} + 20\\text{ dal}$ jika diubah ke dalam satuan Liter ($\\text{l}$) adalah...",
+                illustration: svgLadderReminder(),
+                options: ["$60\\text{ Liter}$", "$240\\text{ Liter}$", "$420\\text{ Liter}$", "$600\\text{ Liter}$"],
+                correctText: "$600\\text{ Liter}$",
+                rationale: "$4\\text{ hl} = 4 \\times 100 = 400\\text{ Liter}$ (turun 2 tangga) dan $20\\text{ dal} = 20 \\times 10 = 200\\text{ Liter}$ (turun 1 tangga). Jumlahnya $400 + 200 = 600\\text{ Liter}$."
+            },
+            {
+                id: 7,
+                category: "Konversi Satuan",
+                question: "Sebuah tangki air menampung $6\\text{ dm}^3$ air, lalu digunakan untuk menyiram tanaman sebanyak $2.500\\text{ cm}^3$. Sisa air di dalam tangki adalah...",
+                options: ["$3.500\\text{ cm}^3$", "$4.500\\text{ cm}^3$", "$350\\text{ cm}^3$", "$8.500\\text{ cm}^3$"],
+                correctText: "$3.500\\text{ cm}^3$",
+                rationale: "$6\\text{ dm}^3 = 6\\text{ Liter} = 6.000\\text{ cm}^3$. Sisa air $= 6.000\\text{ cm}^3 - 2.500\\text{ cm}^3 = 3.500\\text{ cm}^3$."
+            },
+            {
+                id: 8,
+                category: "Konversi Satuan",
+                question: "Rani membawa botol minum berisi $800\\text{ ml}$ air putih, sedangkan Sinta membawa botol berisi $1,2\\text{ Liter}$ air. Selisih volume air minum mereka berdua adalah...",
+                options: ["$200\\text{ ml}$", "$400\\text{ ml}$", "$600\\text{ ml}$", "$2.000\\text{ ml}$"],
+                correctText: "$400\\text{ ml}$",
+                rationale: "$1,2\\text{ Liter} = 1,2 \\times 1.000 = 1.200\\text{ ml}$. Selisihnya adalah $1.200\\text{ ml} - 800\\text{ ml} = 400\\text{ ml}$."
+            },
+            {
+                id: 9,
+                category: "Konversi Satuan",
+                question: "Nilai dari $3.500\\text{ cl}$ apabila dikonversi ke dalam satuan Liter ($\\text{l}$) adalah...",
+                illustration: svgLadderReminder(),
+                options: ["$3,5\\text{ Liter}$", "$35\\text{ Liter}$", "$350\\text{ Liter}$", "$35.000\\text{ Liter}$"],
+                correctText: "$35\\text{ Liter}$",
+                rationale: "Dari sentiliter ($\\text{cl}$) ke Liter ($\\text{l}$) naik 2 anak tangga, sehingga dibagi $100$. Jadi, $3.500 \\div 100 = 35\\text{ Liter}$."
+            },
+            {
+                id: 10,
+                category: "Konversi Satuan",
+                question: "Sebuah ember dapat menampung $9\\text{ Liter}$ air. Volume ember tersebut setara dengan...",
+                options: ["$900\\text{ cm}^3$", "$90\\text{ dm}^3$", "$9.000\\text{ cm}^3$", "$90.000\\text{ ml}$"],
+                correctText: "$9.000\\text{ cm}^3$",
+                rationale: "Karena $1\\text{ Liter} = 1.000\\text{ cm}^3$, maka $9\\text{ Liter} = 9 \\times 1.000 = 9.000\\text{ cm}^3$."
+            },
+
+            // --- BAGIAN 2: VOLUME KUBUS (10 Soal) ---
+            {
+                id: 11,
+                category: "Volume Kubus",
+                question: "Perhatikan susunan kubus satuan yang membentuk sebuah kubus besar berikut! Berapakah volume kubus besar tersebut?",
+                illustration: svgUnitCubeStack(coords3x3x3),
+                options: ["$9\\text{ kubus satuan}$", "$18\\text{ kubus satuan}$", "$27\\text{ kubus satuan}$", "$36\\text{ kubus satuan}$"],
+                correctText: "$27\\text{ kubus satuan}$",
+                rationale: "Kubus besar memiliki panjang rusuk $s = 3$ kubus satuan. Maka $V = s \\times s \\times s = 3 \\times 3 \\times 3 = 27\\text{ kubus satuan}$."
+            },
+            {
+                id: 12,
+                category: "Volume Kubus",
+                question: "Sebuah rubik berbentuk kubus memiliki panjang rusuk $s = 6\\text{ cm}$ seperti pada ilustrasi. Berapakah volume rubik tersebut?",
+                illustration: svgLabeledCube("6 cm", "amber"),
+                options: ["$36\\text{ cm}^3$", "$108\\text{ cm}^3$", "$216\\text{ cm}^3$", "$180\\text{ cm}^3$"],
+                correctText: "$216\\text{ cm}^3$",
+                rationale: "Gunakan rumus volume kubus: $V = s \\times s \\times s = 6 \\times 6 \\times 6 = 36 \\times 6 = 216\\text{ cm}^3$."
+            },
+            {
+                id: 13,
+                category: "Volume Kubus",
+                question: "Sebuah kotak mainan berbentuk kubus mempunyai panjang rusuk $8\\text{ cm}$. Volume kotak mainan tersebut adalah...",
+                illustration: svgLabeledCube("8 cm", "blue"),
+                options: ["$64\\text{ cm}^3$", "$256\\text{ cm}^3$", "$512\\text{ cm}^3$", "$384\\text{ cm}^3$"],
+                correctText: "$512\\text{ cm}^3$",
+                rationale: "$V = s \\times s \\times s = 8 \\times 8 \\times 8 = 64 \\times 8 = 512\\text{ cm}^3$."
+            },
+            {
+                id: 14,
+                category: "Volume Kubus",
+                question: "Sebuah bak mandi berbentuk kubus memiliki panjang rusuk $10\\text{ dm}$. Berapa <strong>Liter</strong> air yang dapat ditampung bak mandi tersebut jika diisi penuh?",
+                illustration: svgLabeledCube("10 dm", "blue"),
+                options: ["$100\\text{ Liter}$", "$1.000\\text{ Liter}$", "$30\\text{ Liter}$", "$10.000\\text{ Liter}$"],
+                correctText: "$1.000\\text{ Liter}$",
+                rationale: "$V = 10 \\times 10 \\times 10 = 1.000\\text{ dm}^3$. Karena $1\\text{ dm}^3 = 1\\text{ Liter}$, maka volumenya adalah $1.000\\text{ Liter}$."
+            },
+            {
+                id: 15,
+                category: "Volume Kubus",
+                question: "Diketahui sebuah kardus berbentuk kubus memiliki volume $27\\text{ cm}^3$. Berapakah panjang rusuk ($s$) kardus kubus tersebut?",
+                options: ["$3\\text{ cm}$", "$9\\text{ cm}$", "$6\\text{ cm}$", "$4\\text{ cm}$"],
+                correctText: "$3\\text{ cm}$",
+                rationale: "Cari bilangan yang jika dikalikan tiga kali berturut-turut hasilnya $27$: $3 \\times 3 \\times 3 = 27$. Jadi panjang rusuknya $3\\text{ cm}$."
+            },
+            {
+                id: 16,
+                category: "Volume Kubus",
+                question: "Sebuah wadah makanan berbentuk kubus memiliki panjang rusuk $7\\text{ cm}$. Volume wadah makanan tersebut adalah...",
+                options: ["$49\\text{ cm}^3$", "$147\\text{ cm}^3$", "$294\\text{ cm}^3$", "$343\\text{ cm}^3$"],
+                correctText: "$343\\text{ cm}^3$",
+                rationale: "$V = 7 \\times 7 \\times 7 = 49 \\times 7 = 343\\text{ cm}^3$."
+            },
+            {
+                id: 17,
+                category: "Volume Kubus",
+                question: "Budi mempunyai dua buah kotak kubus yang sama persis. Masing-masing kotak memiliki panjang rusuk $3\\text{ cm}$. Berapa $\\text{cm}^3$ jumlah volume kedua kotak tersebut?",
+                options: ["$27\\text{ cm}^3$", "$54\\text{ cm}^3$", "$18\\text{ cm}^3$", "$81\\text{ cm}^3$"],
+                correctText: "$54\\text{ cm}^3$",
+                rationale: "Volume 1 kubus $= 3 \\times 3 \\times 3 = 27\\text{ cm}^3$. Karena ada 2 kubus sama besar, total volumenya $= 2 \\times 27 = 54\\text{ cm}^3$."
+            },
+            {
+                id: 18,
+                category: "Volume Kubus",
+                question: "Sebuah kaleng biskuit berbentuk kubus dengan rusuk $9\\text{ cm}$. Volume kaleng biskuit tersebut adalah...",
+                options: ["$81\\text{ cm}^3$", "$486\\text{ cm}^3$", "$729\\text{ cm}^3$", "$270\\text{ cm}^3$"],
+                correctText: "$729\\text{ cm}^3$",
+                rationale: "$V = 9 \\times 9 \\times 9 = 81 \\times 9 = 729\\text{ cm}^3$."
+            },
+            {
+                id: 19,
+                category: "Volume Kubus",
+                question: "Sebuah kubus memiliki luas alas $16\\text{ cm}^2$. Berapakah volume kubus tersebut?",
+                options: ["$32\\text{ cm}^3$", "$48\\text{ cm}^3$", "$64\\text{ cm}^3$", "$256\\text{ cm}^3$"],
+                correctText: "$64\\text{ cm}^3$",
+                rationale: "Alas kubus berbentuk persegi dengan luas $s \\times s = 16\\text{ cm}^2$, maka $s = 4\\text{ cm}$. Volume kubus $= 4 \\times 4 \\times 4 = 64\\text{ cm}^3$."
+            },
+            {
+                id: 20,
+                category: "Volume Kubus",
+                question: "Sebuah wadah kubus berusuk $10\\text{ cm}$ baru terisi air <strong>setengah bagian</strong>. Berapa $\\text{ml}$ volume air di dalam wadah tersebut?",
+                options: ["$1.000\\text{ ml}$", "$500\\text{ ml}$", "$250\\text{ ml}$", "$100\\text{ ml}$"],
+                correctText: "$500\\text{ ml}$",
+                rationale: "Volume penuh kubus $= 10 \\times 10 \\times 10 = 1.000\\text{ cm}^3 = 1.000\\text{ ml}$. Karena terisi setengah bagian, volumenya $= 1.000 \\div 2 = 500\\text{ ml}$."
+            },
+
+            // --- BAGIAN 3: VOLUME BALOK (10 Soal) ---
+            {
+                id: 21,
+                category: "Volume Balok",
+                question: "Perhatikan bangun balok yang tersusun dari kubus satuan di bawah ini! Berapa volume balok tersebut?",
+                illustration: svgUnitCubeStack(coords4x2x2),
+                options: ["$8\\text{ kubus satuan}$", "$12\\text{ kubus satuan}$", "$16\\text{ kubus satuan}$", "$20\\text{ kubus satuan}$"],
+                correctText: "$16\\text{ kubus satuan}$",
+                rationale: "Balok memiliki panjang $p = 4$, lebar $l = 2$, dan tinggi $t = 2$. Maka $V = 4 \\times 2 \\times 2 = 16\\text{ kubus satuan}$."
+            },
+            {
+                id: 22,
+                category: "Volume Balok",
+                question: "Hitunglah volume balok yang tersusun dari kubus satuan pada ilustrasi berikut!",
+                illustration: svgUnitCubeStack(coords3x2x3),
+                options: ["$12\\text{ kubus satuan}$", "$15\\text{ kubus satuan}$", "$18\\text{ kubus satuan}$", "$24\\text{ kubus satuan}$"],
+                correctText: "$18\\text{ kubus satuan}$",
+                rationale: "Balok memiliki panjang $p = 3$, lebar $l = 2$, dan tinggi $t = 3$. Maka $V = 3 \\times 2 \\times 3 = 18\\text{ kubus satuan}$."
+            },
+            {
+                id: 23,
+                category: "Volume Balok",
+                question: "Sebuah kotak sepatu berbentuk balok memiliki panjang $12\\text{ cm}$, lebar $5\\text{ cm}$, dan tinggi $4\\text{ cm}$. Berapa volume kotak sepatu tersebut?",
+                illustration: svgLabeledCuboid("12 cm", "5 cm", "4 cm", "teal"),
+                options: ["$60\\text{ cm}^3$", "$120\\text{ cm}^3$", "$240\\text{ cm}^3$", "$200\\text{ cm}^3$"],
+                correctText: "$240\\text{ cm}^3$",
+                rationale: "Gunakan rumus volume balok: $V = p \\times l \\times t = 12 \\times 5 \\times 4 = 60 \\times 4 = 240\\text{ cm}^3$."
+            },
+            {
+                id: 24,
+                category: "Volume Balok",
+                question: "Sebuah balok kayu berukuran panjang $15\\text{ cm}$, lebar $6\\text{ cm}$, dan tinggi $5\\text{ cm}$ seperti pada gambar. Volume balok kayu tersebut adalah...",
+                illustration: svgLabeledCuboid("15 cm", "6 cm", "5 cm", "purple"),
+                options: ["$350\\text{ cm}^3$", "$450\\text{ cm}^3$", "$550\\text{ cm}^3$", "$90\\text{ cm}^3$"],
+                correctText: "$450\\text{ cm}^3$",
+                rationale: "$V = p \\times l \\times t = 15 \\times 6 \\times 5 = 90 \\times 5 = 450\\text{ cm}^3$."
+            },
+            {
+                id: 25,
+                category: "Volume Balok",
+                question: "Sebuah kotak jus kemasan berbentuk balok berukuran panjang $8\\text{ cm}$, lebar $5\\text{ cm}$, dan tinggi $10\\text{ cm}$. Volume kotak jus tersebut adalah...",
+                options: ["$40\\text{ cm}^3$", "$200\\text{ cm}^3$", "$400\\text{ cm}^3$", "$800\\text{ cm}^3$"],
+                correctText: "$400\\text{ cm}^3$",
+                rationale: "$V = 8 \\times 5 \\times 10 = 40 \\times 10 = 400\\text{ cm}^3$ (atau $400\\text{ ml}$)."
+            },
+            {
+                id: 26,
+                category: "Volume Balok",
+                question: "Sebuah kolam ikan berbentuk balok memiliki panjang $4\\text{ m}$, lebar $2\\text{ m}$, dan kedalaman (tinggi) $1\\text{ m}$. Volume kolam ikan tersebut adalah...",
+                options: ["$6\\text{ m}^3$", "$7\\text{ m}^3$", "$8\\text{ m}^3$", "$10\\text{ m}^3$"],
+                correctText: "$8\\text{ m}^3$",
+                rationale: "$V = p \\times l \\times t = 4 \\times 2 \\times 1 = 8\\text{ m}^3$."
+            },
+            {
+                id: 27,
+                category: "Volume Balok",
+                question: "Diketahui volume sebuah balok adalah $120\\text{ cm}^3$. Jika panjang balok $6\\text{ cm}$ dan lebarnya $4\\text{ cm}$, berapakah tinggi ($t$) balok tersebut?",
+                options: ["$4\\text{ cm}$", "$5\\text{ cm}$", "$6\\text{ cm}$", "$10\\text{ cm}$"],
+                correctText: "$5\\text{ cm}$",
+                rationale: "Luas alas $= p \\times l = 6 \\times 4 = 24\\text{ cm}^2$. Tinggi balok $= \\text{Volume} \\div \\text{Luas alas} = 120 \\div 24 = 5\\text{ cm}$."
+            },
+            {
+                id: 28,
+                category: "Volume Balok",
+                question: "Sebuah akuarium balok berukuran panjang $25\\text{ cm}$, lebar $10\\text{ cm}$, dan tinggi $20\\text{ cm}$. Jika diisi air sampai penuh, berapa <strong>Liter</strong> air di dalamnya?",
+                illustration: svgLabeledCuboid("25 cm", "10 cm", "20 cm", "teal"),
+                options: ["$5\\text{ Liter}$", "$50\\text{ Liter}$", "$500\\text{ Liter}$", "$5.000\\text{ Liter}$"],
+                correctText: "$5\\text{ Liter}$",
+                rationale: "Volume $= 25 \\times 10 \\times 20 = 5.000\\text{ cm}^3$. Ubah ke Liter dengan membagi $1.000$: $5.000 \\div 1.000 = 5\\text{ Liter}$."
+            },
+            {
+                id: 29,
+                category: "Volume Balok",
+                question: "Alas sebuah kotak tisu berbentuk persegi panjang memiliki luas $45\\text{ cm}^2$. Jika tinggi kotak tisu tersebut $6\\text{ cm}$, volumenya adalah...",
+                options: ["$240\\text{ cm}^3$", "$270\\text{ cm}^3$", "$300\\text{ cm}^3$", "$51\\text{ cm}^3$"],
+                correctText: "$270\\text{ cm}^3$",
+                rationale: "Volume balok juga dapat dihitung dengan $\\text{Luas Alas} \\times \\text{Tinggi} = 45 \\times 6 = 270\\text{ cm}^3$."
+            },
+            {
+                id: 30,
+                category: "Volume Balok",
+                question: "Manakah bangun yang volumenya <strong>LEBIH BESAR</strong>: Kubus A dengan rusuk $5\\text{ cm}$ atau Balok B berukuran $6\\text{ cm} \\times 5\\text{ cm} \\times 4\\text{ cm}$?",
+                options: [
+                    "Kubus A lebih besar ($125\\text{ cm}^3 > 120\\text{ cm}^3$)",
+                    "Balok B lebih besar ($150\\text{ cm}^3 > 125\\text{ cm}^3$)",
+                    "Keduanya memiliki volume yang sama ($120\\text{ cm}^3$)",
+                    "Balok B lebih besar ($125\\text{ cm}^3 > 100\\text{ cm}^3$)"
+                ],
+                correctText: "Kubus A lebih besar ($125\\text{ cm}^3 > 120\\text{ cm}^3$)",
+                rationale: "Volume Kubus A $= 5 \\times 5 \\times 5 = 125\\text{ cm}^3$. Volume Balok B $= 6 \\times 5 \\times 4 = 120\\text{ cm}^3$. Jadi, Kubus A lebih besar ($125\\text{ cm}^3 > 120\\text{ cm}^3$)."
+            }
+        ];
+
+        const STORAGE_KEY = 'kuis_volume_kls4_state_v1';
+
+        // Default or Restored State
+        let quizState = {
+            currentIdx: 0,
+            // optionOrders[i] stores shuffled array of option strings for question i
+            optionOrders: [],
+            // userAnswers[i] stores selected option string or null
+            userAnswers: Array(baseQuestions.length).fill(null)
+        };
+
+        // Balanced & Shuffled Option Generator (Guarantees no A-B-C-D pattern and no single option dominance)
+        function generateBalancedOptionOrders() {
+            // Create 30 target indices: seven 0s, eight 1s, seven 2s, eight 3s (total 30)
+            const targetIndices = [
+                0,0,0,0,0,0,0,
+                1,1,1,1,1,1,1,1,
+                2,2,2,2,2,2,2,
+                3,3,3,3,3,3,3,3
+            ];
+            // Fisher-Yates shuffle targetIndices, avoiding >2 consecutive identical indices
+            for (let i = targetIndices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [targetIndices[i], targetIndices[j]] = [targetIndices[j], targetIndices[i]];
+            }
+            // Break any 3-in-a-row streak
+            for (let i = 2; i < targetIndices.length; i++) {
+                if (targetIndices[i] === targetIndices[i - 1] && targetIndices[i] === targetIndices[i - 2]) {
+                    const swapWith = (i + 3) % targetIndices.length;
+                    [targetIndices[i], targetIndices[swapWith]] = [targetIndices[swapWith], targetIndices[i]];
+                }
+            }
+
+            return baseQuestions.map((q, idx) => {
+                const correct = q.correctText;
+                const distractors = q.options.filter(opt => opt !== correct);
+                // Shuffle distractors
+                for (let i = distractors.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [distractors[i], distractors[j]] = [distractors[j], distractors[i]];
+                }
+                const targetPos = targetIndices[idx];
+                const arranged = [];
+                let dIdx = 0;
+                for (let pos = 0; pos < 4; pos++) {
+                    if (pos === targetPos) {
+                        arranged.push(correct);
+                    } else {
+                        arranged.push(distractors[dIdx++]);
+                    }
+                }
+                return arranged;
+            });
+        }
+
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (
+                        parsed &&
+                        Array.isArray(parsed.userAnswers) &&
+                        parsed.userAnswers.length === baseQuestions.length &&
+                        Array.isArray(parsed.optionOrders) &&
+                        parsed.optionOrders.length === baseQuestions.length
+                    ) {
+                        quizState = parsed;
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.warn("Gagal membaca localStorage:", e);
+            }
+            quizState.optionOrders = generateBalancedOptionOrders();
+            saveState();
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(quizState));
+                const ind = document.getElementById('save-indicator');
+                if (ind) {
+                    ind.textContent = "Tersimpan ✓";
+                    ind.classList.add('bg-emerald-100');
+                    setTimeout(() => {
+                        ind.textContent = "Tersimpan";
+                        ind.classList.remove('bg-emerald-100');
+                    }, 900);
+                }
+            } catch (e) {
+                console.warn("Gagal menyimpan ke localStorage:", e);
+            }
+        }
+
+        function renderAllMath(container = document.body) {
+            if (typeof renderMathInElement === 'function') {
+                renderMathInElement(container, {
+                    delimiters: [
+                        { left: '$$', right: '$$', display: true },
+                        { left: '$', right: '$', display: false }
+                    ],
+                    throwOnError: false
+                });
+            }
+        }
+
+        function renderNavigationGrid() {
+            const navGrid = document.getElementById('nav-grid');
+            navGrid.innerHTML = '';
+
+            baseQuestions.forEach((q, idx) => {
+                const btn = document.createElement('button');
+                const ans = quizState.userAnswers[idx];
+                const isCurrent = idx === quizState.currentIdx;
+
+                let baseClass = "h-10 rounded-xl font-bold text-xs transition-all flex items-center justify-center border-2 ";
+
+                if (ans === null) {
+                    baseClass += isCurrent
+                        ? "bg-indigo-50 border-indigo-600 text-indigo-700 shadow-sm scale-105"
+                        : "bg-slate-50 border-slate-200 text-slate-600 hover:border-indigo-400";
+                } else if (ans === q.correctText) {
+                    baseClass += isCurrent
+                        ? "bg-emerald-500 border-slate-900 text-white shadow-md scale-105"
+                        : "bg-emerald-500 border-emerald-600 text-white";
+                } else {
+                    baseClass += isCurrent
+                        ? "bg-rose-500 border-slate-900 text-white shadow-md scale-105"
+                        : "bg-rose-500 border-rose-600 text-white";
+                }
+
+                btn.className = baseClass;
+                btn.textContent = idx + 1;
+                btn.onclick = () => goToQuestion(idx);
+                navGrid.appendChild(btn);
+            });
+        }
+
+        function updateStats() {
+            let correctCount = 0;
+            let wrongCount = 0;
+
+            baseQuestions.forEach((q, idx) => {
+                const ans = quizState.userAnswers[idx];
+                if (ans !== null) {
+                    if (ans === q.correctText) correctCount++;
+                    else wrongCount++;
+                }
+            });
+
+            const answeredCount = correctCount + wrongCount;
+            const score = Math.round((correctCount / baseQuestions.length) * 100);
+            const progressPct = (answeredCount / baseQuestions.length) * 100;
+
+            document.getElementById('header-correct').textContent = correctCount;
+            document.getElementById('header-answered').textContent = answeredCount;
+            document.getElementById('progress-bar').style.width = `${progressPct}%`;
+
+            document.getElementById('stat-correct').textContent = correctCount;
+            document.getElementById('stat-wrong').textContent = wrongCount;
+            document.getElementById('stat-score').textContent = score;
+
+            // Show finish button if all 30 answered or on last question
+            const finishBtn = document.getElementById('btn-finish');
+            if (answeredCount === baseQuestions.length || quizState.currentIdx === baseQuestions.length - 1) {
+                finishBtn.classList.remove('hidden');
+            } else {
+                finishBtn.classList.add('hidden');
+            }
+        }
+
+        function renderCurrentQuestion() {
+            const idx = quizState.currentIdx;
+            const q = baseQuestions[idx];
+            const orderedOptions = quizState.optionOrders[idx];
+            const userAns = quizState.userAnswers[idx];
+            const isAnswered = userAns !== null;
+            const letters = ['A', 'B', 'C', 'D'];
+
+            // Badges
+            document.getElementById('q-number-badge').textContent = `Soal ${idx + 1} dari ${baseQuestions.length}`;
+            const catBadge = document.getElementById('q-category-badge');
+            catBadge.textContent = q.category;
+            if (q.category === "Konversi Satuan") {
+                catBadge.className = "bg-sky-100 text-sky-800 text-xs font-bold px-3 py-1.5 rounded-xl";
+            } else if (q.category === "Volume Kubus") {
+                catBadge.className = "bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-xl";
+            } else {
+                catBadge.className = "bg-teal-100 text-teal-800 text-xs font-bold px-3 py-1.5 rounded-xl";
+            }
+
+            const statusBadge = document.getElementById('q-status-badge');
+            if (!isAnswered) {
+                statusBadge.textContent = "Belum Dijawab";
+                statusBadge.className = "text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-500";
+            } else if (userAns === q.correctText) {
+                statusBadge.textContent = "✓ Jawaban Benar";
+                statusBadge.className = "text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800";
+            } else {
+                statusBadge.textContent = "✕ Jawaban Salah";
+                statusBadge.className = "text-xs font-bold px-3 py-1 rounded-full bg-rose-100 text-rose-800";
+            }
+
+            // Illustration
+            const illusContainer = document.getElementById('q-illustration');
+            if (q.illustration) {
+                illusContainer.innerHTML = q.illustration;
+                illusContainer.classList.remove('hidden');
+            } else {
+                illusContainer.innerHTML = '';
+                illusContainer.classList.add('hidden');
+            }
+
+            // Question Text
+            document.getElementById('q-text').innerHTML = q.question;
+
+            // Options
+            const optionsContainer = document.getElementById('q-options');
+            optionsContainer.innerHTML = '';
+
+            orderedOptions.forEach((optText, optIdx) => {
+                const btn = document.createElement('button');
+                const isSelected = userAns === optText;
+                const isCorrectOpt = optText === q.correctText;
+
+                let btnClass = "w-full text-left p-3.5 md:p-4 rounded-2xl border-2 transition-all flex items-center gap-3.5 text-sm md:text-base font-medium ";
+                let badgeClass = "w-8 h-8 rounded-xl flex items-center justify-center font-extrabold text-xs flex-shrink-0 ";
+
+                if (!isAnswered) {
+                    btnClass += "bg-white border-slate-200 hover:border-indigo-500 hover:bg-indigo-50/40 text-slate-800 cursor-pointer";
+                    badgeClass += "bg-slate-100 text-slate-700";
+                } else {
+                    btn.disabled = true;
+                    if (isCorrectOpt) {
+                        btnClass += "bg-emerald-50 border-emerald-500 text-emerald-950 font-semibold";
+                        badgeClass += "bg-emerald-600 text-white";
+                    } else if (isSelected && !isCorrectOpt) {
+                        btnClass += "bg-rose-50 border-rose-500 text-rose-950";
+                        badgeClass += "bg-rose-600 text-white";
+                    } else {
+                        btnClass += "bg-slate-50 border-slate-200 text-slate-400 opacity-75";
+                        badgeClass += "bg-slate-200 text-slate-500";
+                    }
+                }
+
+                btn.className = btnClass;
+                btn.innerHTML = `
+                    <span class="${badgeClass}">${letters[optIdx]}</span>
+                    <span class="flex-grow">${optText}</span>
+                    ${isAnswered && isCorrectOpt ? '<span class="text-emerald-600 font-bold text-lg">✓</span>' : ''}
+                    ${isAnswered && isSelected && !isCorrectOpt ? '<span class="text-rose-600 font-bold text-lg">✕</span>' : ''}
+                `;
+
+                if (!isAnswered) {
+                    btn.onclick = () => selectAnswer(optText);
+                }
+
+                optionsContainer.appendChild(btn);
+            });
+
+            // Feedback Box
+            const fbBox = document.getElementById('q-feedback');
+            if (isAnswered) {
+                const isCorrect = userAns === q.correctText;
+                fbBox.classList.remove('hidden');
+                if (isCorrect) {
+                    fbBox.className = "mt-6 p-4 md:p-5 rounded-2xl border-2 bg-emerald-50 border-emerald-400 text-emerald-950 fade-in";
+                    document.getElementById('fb-icon').textContent = "🎉";
+                    document.getElementById('fb-title').textContent = "Hebat! Jawabanmu Benar!";
+                } else {
+                    fbBox.className = "mt-6 p-4 md:p-5 rounded-2xl border-2 bg-rose-50 border-rose-400 text-rose-950 fade-in";
+                    document.getElementById('fb-icon').textContent = "💡";
+                    document.getElementById('fb-title').textContent = "Belum Tepat! Yuk Simak Pembahasannya:";
+                }
+                document.getElementById('fb-rationale').innerHTML = q.rationale;
+            } else {
+                fbBox.classList.add('hidden');
+            }
+
+            // Prev / Next buttons state
+            document.getElementById('btn-prev').disabled = idx === 0;
+            document.getElementById('btn-next').disabled = idx === baseQuestions.length - 1;
+
+            renderNavigationGrid();
+            updateStats();
+            renderAllMath(document.getElementById('question-card'));
+        }
+
+        function selectAnswer(chosenText) {
+            const idx = quizState.currentIdx;
+            if (quizState.userAnswers[idx] !== null) return; // Lock once answered
+
+            quizState.userAnswers[idx] = chosenText;
+            saveState();
+            renderCurrentQuestion();
+        }
+
+        function goToQuestion(idx) {
+            if (idx < 0 || idx >= baseQuestions.length) return;
+            quizState.currentIdx = idx;
+            saveState();
+            renderCurrentQuestion();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function prevQuestion() {
+            goToQuestion(quizState.currentIdx - 1);
+        }
+
+        function nextQuestion() {
+            goToQuestion(quizState.currentIdx + 1);
+        }
+
+        function showSummaryModal() {
+            let correctCount = 0;
+            let wrongCount = 0;
+
+            baseQuestions.forEach((q, idx) => {
+                const ans = quizState.userAnswers[idx];
+                if (ans !== null) {
+                    if (ans === q.correctText) correctCount++;
+                    else wrongCount++;
+                }
+            });
+
+            const unansweredCount = baseQuestions.length - (correctCount + wrongCount);
+            const finalScore = Math.round((correctCount / baseQuestions.length) * 100);
+
+            document.getElementById('modal-final-score').textContent = finalScore;
+            document.getElementById('modal-correct').textContent = correctCount;
+            document.getElementById('modal-wrong').textContent = wrongCount;
+            document.getElementById('modal-unanswered').textContent = unansweredCount;
+
+            const trophy = document.getElementById('modal-trophy');
+            const subtitle = document.getElementById('modal-subtitle');
+
+            if (finalScore >= 85) {
+                trophy.textContent = "🏆🌟";
+                subtitle.textContent = "Luar biasa! Kamu sudah sangat menguasai Konversi Satuan & Volume Kubus Balok!";
+            } else if (finalScore >= 65) {
+                trophy.textContent = "👏😊";
+                subtitle.textContent = "Bagus sekali! Terus berlatih agar nilaimu semakin sempurna!";
+            } else {
+                trophy.textContent = "💪📚";
+                subtitle.textContent = "Tetap semangat belajar! Cek kembali pembahasan tiap soal ya.";
+            }
+
+            document.getElementById('summary-modal').classList.remove('hidden');
+        }
+
+        function closeSummaryModal() {
+            document.getElementById('summary-modal').classList.add('hidden');
+        }
+
+        function confirmReset() {
+            if (confirm("Apakah kamu yakin ingin mengulang kuis dari awal? Semua jawaban sebelumnya akan dihapus dan urutan pilihan jawaban akan diacak ulang.")) {
+                localStorage.removeItem(STORAGE_KEY);
+                quizState = {
+                    currentIdx: 0,
+                    optionOrders: generateBalancedOptionOrders(),
+                    userAnswers: Array(baseQuestions.length).fill(null)
+                };
+                saveState();
+                closeSummaryModal();
+                renderCurrentQuestion();
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            renderCurrentQuestion();
+            renderAllMath();
+        });
+    </script>
+</body>
+</html>
